@@ -1,0 +1,33 @@
+---
+- hosts: arbeitsplatz
+  gather_facts: false
+  handlers:
+    - name: XnViewMP manuell installieren
+      ansible.builtin.apt:
+        deb: /usr/local/share/ansible_downloads/XnViewMP-linux-x64.deb
+
+    - name: apt-get update ausführen
+      ansible.builtin.apt:
+        update_cache: true
+      tags: software
+
+  pre_tasks:
+    - name: Power on clients
+      include_role:
+        name: tasmota_power_on
+      when: tasmota_wireless_ip is defined
+
+    - name: Fakten einlesen
+      setup:
+    - name: apt-get update
+      ansible.builtin.apt:
+        update_cache: true
+      tags: software
+
+  post_tasks:
+    - name: Poweroff unused clients that were off before
+      include_role:
+        name: tasmota_power_off
+      when: (tasmota_wireless_ip is defined) and (connect_result is failed)
+  roles:
+    - arbeitsplatz

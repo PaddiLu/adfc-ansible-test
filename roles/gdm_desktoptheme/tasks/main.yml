@@ -4,20 +4,33 @@
     name:
       - gdm3
 
-- name: Create Desktop Theme Directory
+- name: Create directories
   ansible.builtin.file:
-    path: /usr/share/plasma/desktoptheme/ADFC
+    path: "{{ item }}"
     state: directory
-    mode: "0755"
+    mode: 0755
+    owner: root
+    group: root
   tags: gdm
-
+  loop:
+    - "/usr/share/plasma/desktoptheme/ADFC"
+    - "/usr/share/plasma/desktoptheme/ADFC/icons"
+    - "/usr/share/wallpapers/ADFC"
+    - "/usr/share/wallpapers/ADFC/contents"
+    - "/usr/share/wallpapers/ADFC/contents/images"
+    - "/usr/share/kubuntu-default-settings/kf5-settings"
+    - "/usr/share/gnome-shell/theme"
 - name: Sync Theme folder
-  ansible.posix.synchronize:
-    src: desktopthemes/ADFC
-    dest: /usr/share/plasma/desktoptheme/
-    recursive: true
-    ssh_args: true
+  ansible.builtin.copy:
+    src: "desktopthemes/ADFC/{{ item}}"
+    dest: "/usr/share/plasma/desktoptheme/ADFC/{{ item }}"
+    mode: "0644"
+    owner: root
+    group: root
   tags: gdm
+  loop:
+    - "icons/start.svgz"
+    - "metadata.desktop"
 
 - name: Copy config for default desktoptheme
   ansible.builtin.copy:
@@ -34,12 +47,17 @@
   tags: gdm
 
 - name: Sync wallpaper directory
-  ansible.posix.synchronize:
-    src: wallpapers/ADFC
-    dest: /usr/share/wallpapers/
-    recursive: true
-    ssh_args: true
+  ansible.builtin.copy:
+    src: "wallpapers/ADFC/{{ item }}"
+    dest: "/usr/share/wallpapers/ADFC/{{ item }}"
+    mode: "0644"
+    owner: root
+    group: root
   tags: gdm
+  loop:
+    - "contents/images/1920x1200.png"
+    - "contents/screenshot.png"
+    - "metadata.desktop"
 
 - name: Create Themes Directory
   ansible.builtin.file:
@@ -82,7 +100,7 @@
     mode: "0644"
     owner: root
     group: root
-  notify: restart gdm3
+  notify: Restart gdm3
   tags: gdm
 
 - name: Copy ubuntu.css to client
@@ -98,7 +116,7 @@
     src: /usr/share/gnome-shell/theme/ubuntu-adfc.css
     dest: /etc/alternatives/gdm3.css
     state: link
-  notify: restart gdm3
+  notify: Restart gdm3
   tags: gdm
 
 - name: Copy ADFC-Login background
