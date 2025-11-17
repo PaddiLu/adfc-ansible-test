@@ -18,7 +18,7 @@
       ExecStart=
       ExecStart=/usr/sbin/pcscd --foreground $PCSCD_ARGS
     dest: /etc/systemd/system/pcscd.service.d/ansible_override.conf
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
   notify:
